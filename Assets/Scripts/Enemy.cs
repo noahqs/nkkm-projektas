@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -33,6 +34,14 @@ public class Enemy : MonoBehaviour
     public float recoilAngle = 1;
     public float maxDistance = 50;
 
+    public RaycastHit rayHit;
+
+    public GameObject wound;
+
+    //health
+
+    public int hp = 10;
+
     private void Awake()
     {
         player = GameObject.Find("Player").transform;
@@ -48,7 +57,7 @@ public class Enemy : MonoBehaviour
         if (!playerInRange && !playerInAttackRange) Wandering();
         if (playerInRange && !playerInAttackRange) ChasePlayer();
         if (playerInRange && playerInAttackRange) AttackPlayer();
-        
+
     }
 
     private void Wandering()
@@ -95,11 +104,26 @@ public class Enemy : MonoBehaviour
             var offsetX = Random.Range(-recoilAngle, recoilAngle);
             var offsetY = Random.Range(-recoilAngle, recoilAngle);
 
-            //
+            // Calculate the direction towards the player with the random offset
+            Vector3 direction = (player.position + new Vector3(offsetX, offsetY, 0f)) - transform.position;
+
+            // Shoot a raycast towards the player
+            if (Physics.Raycast(transform.position, direction, out RaycastHit rayHit, Mathf.Infinity, whatIsPlayer))
+            {
+                Debug.Log(rayHit.collider.name);
+
+                // Instantiate a bullet prefab at the hit point
+                Instantiate(wound, rayHit.point, Quaternion.identity);
+            }
 
             alreadyAttacked = true;
             Invoke(nameof(ResetAttack), timeBetweenAttacks);
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+
     }
 
     private void ResetAttack()

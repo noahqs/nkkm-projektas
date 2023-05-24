@@ -1,83 +1,131 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class playerShooting : MonoBehaviour
 {
-    public GameObject hitPrefab;
-    public float maxDistance = 100;
+    //Gun stats
+    public int damage;
+    public float timeBetweenShooting, spread, range, reload, timeBetweenShots;
+    public int magazineSize, bulletsPerClick;
+    public bool allowHold;
+    private int bulletsLeft, bulletsShot;
 
-    private AudioSource source;
-    public AudioClip shootSound;
+    bool shooting, readyToShoot, reloading;
 
+    public Camera fpsCam;
+    public Transform attackPoint;
+    public RaycastHit rayHit;
+    public LayerMask whatIsEnemy;
+
+    public GameObject bulletHole;
+    public GameObject woundHole;
     public ParticleSystem muzzleFlash;
+    public ParticleSystem cartridgeEffect;
+    public TextMeshProUGUI text;
 
-    public UnityEvent onShoot;
-
-    public int maxAmmo = 12;
-    public int ammo;
-
-    public float recoilAngle = 1;
-    public int shotsPerAmmo = 5;
-
-    //public int damage = 10;
+    public AudioSource audioSourceShoot;
+    public AudioSource audioSourceReload;
+    public AudioSource audioSourceEmpty;
+    public AudioClip shootSound;
+    public AudioClip reloadSound;
+    public AudioClip emptySound;
 
     private void Start()
     {
-        source = gameObject.AddComponent<AudioSource>();
+        bulletsLeft = magazineSize;
+        readyToShoot = true;
+
+        audioSourceShoot = GetComponent<AudioSource>();
+        audioSourceReload = GetComponent<AudioSource>();
+        audioSourceEmpty = GetComponent<AudioSource>();
     }
 
-
-    void Update()
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        MyInput();
+
+        text.SetText(bulletsLeft + " / " + magazineSize);
+    }
+
+    private void MyInput()
+    {
+        if (allowHold) shooting = Input.GetKey(KeyCode.Mouse0);
+        else shooting = Input.GetKeyDown(KeyCode.Mouse0);
+
+        if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading) Reload();
+        if (Input.GetKeyDown(KeyCode.Mouse0) && bulletsLeft <= 0 && !reloading) audioSourceEmpty.PlayOneShot(emptySound, 0.7f);
+
+        //shoot
+
+        if (readyToShoot && shooting && !reloading && bulletsLeft > 0)
         {
+            bulletsShot = bulletsPerClick;
             Shoot();
         }
     }
 
-    //void TryShoot()
-    //{
-    //    if (ammo <= 0) return;
-    //    ammo--;
-    //    onShoot.Invoke();
-
-    //    for (int i = 0; i < shotsPerAmmo; i++)
-    //    {
-    //        Shoot();
-    //    }
-    //}
-
-
-    void Shoot()
+    public void Shoot()
     {
+        readyToShoot = false;
 
-        var cam = Camera.main;
-        var dir = cam.transform.forward;
+        //Spread
+        float x = UnityEngine.Random.Range(-spread, spread);
+        float y = UnityEngine.Random.Range(-spread, spread);
 
-        var offsetX = Random.Range(-recoilAngle, recoilAngle);
-        var offsetY = Random.Range(-recoilAngle, recoilAngle);
-        dir = Quaternion.Euler(offsetX, offsetY, 0) * dir;
+        Vector3 direction = fpsCam.transform.forward + new Vector3(x, y, 0);
 
-        var ray = new Ray(cam.transform.position, dir);
-
-        muzzleFlash.Play();
-        print("shot");
-        source.PlayOneShot(shootSound);
-
-
-        if (Physics.Raycast(ray, out var hit, maxDistance))
+        //Raycast
+        if (Physics.Raycast(fpsCam.transform.position, direction, out rayHit, range, whatIsEnemy))
         {
+            //Debug.Log(rayHit.collider.name);
 
-            if (!hit.transform.CompareTag("Enemy"))
+            if (rayHit.collider.CompareTag("Enemy"))
             {
-                var hitObj = Instantiate(hitPrefab, hit.point, Quaternion.Euler(0, 0, 0), hit.transform);
-                Destroy(hitObj);
-                print("hit");
-                hitObj.transform.forward = hit.normal;
-                hitObj.transform.position += hit.normal * 0.02f;
+                rayHit.collider.GetComponent<Enemy>().TakeDamage(damage);
+                var wound = Instantiate(woundHole, rayHit.point, transform.rotation * Quaternion.Euler(0f, 180f, 0f));
+                Destroy(wound, 2);
+            }
+            else
+            {
+                var bullet = Instantiate(bulletHole, rayHit.point, transform.rotation * Quaternion.Euler(0f, 180f, 0f));
+                Destroy(bullet, 5);
             }
         }
+
+        muzzleFlash.Play();
+        cartridgeEffect.Play();
+
+        audioSourceShoot.PlayOneShot(shootSound, 0.7f);
+
+        bulletsLeft--;
+        bulletsShot--;
+
+        Invoke("ResetShot", timeBetweenShooting);
+
+        if (bulletsShot > 0 && bulletsLeft > 0)
+            Invoke("Shoot", timeBetweenShots);
+
+    }
+
+    private void ResetShot()
+    {
+        readyToShoot = true;
+    }
+
+    private void Reload()
+    {
+        reloading = true;
+        audioSourceReload.PlayOneShot(reloadSound, 0.7f);
+        Invoke("ReloadFinished", reload);
+    }
+
+    private void ReloadFinished()
+    {
+        bulletsLeft = magazineSize;
+        reloading = false;
     }
 }
