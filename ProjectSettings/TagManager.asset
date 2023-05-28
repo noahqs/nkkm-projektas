@@ -7,6 +7,10 @@ TagManager:
   - Ladder
   - Platform
   - Enemy
+  - Obstacle
+  - bld1
+  - bld2
+  - bld3
   layers:
   - Default
   - TransparentFX

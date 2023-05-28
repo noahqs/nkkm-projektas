@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class playerShooting : MonoBehaviour
+public class PlayerShooting : MonoBehaviour
 {
     //Gun stats
     public int damage;
@@ -42,6 +42,8 @@ public class playerShooting : MonoBehaviour
         audioSourceShoot = GetComponent<AudioSource>();
         audioSourceReload = GetComponent<AudioSource>();
         audioSourceEmpty = GetComponent<AudioSource>();
+
+        
     }
 
     private void Update()
@@ -81,11 +83,10 @@ public class playerShooting : MonoBehaviour
         //Raycast
         if (Physics.Raycast(fpsCam.transform.position, direction, out rayHit, range, whatIsEnemy))
         {
-            //Debug.Log(rayHit.collider.name);
-
             if (rayHit.collider.CompareTag("Enemy"))
             {
-                rayHit.collider.GetComponent<Enemy>().TakeDamage(damage);
+                rayHit.collider.GetComponent<Enemy>().TakeDamage();
+
                 var wound = Instantiate(woundHole, rayHit.point, transform.rotation * Quaternion.Euler(0f, 180f, 0f));
                 Destroy(wound, 2);
             }
