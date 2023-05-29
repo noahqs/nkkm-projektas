@@ -11,6 +11,7 @@ TagManager:
   - bld1
   - bld2
   - bld3
+  - bld4
   layers:
   - Default
   - TransparentFX
