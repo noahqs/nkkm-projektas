@@ -13,6 +13,7 @@ public class PlayerShooting : MonoBehaviour
     public int magazineSize, bulletsPerClick;
     public bool allowHold;
     private int bulletsLeft, bulletsShot;
+    public int maxCapacity;
 
     bool shooting, readyToShoot, reloading;
 
@@ -58,8 +59,8 @@ public class PlayerShooting : MonoBehaviour
         if (allowHold) shooting = Input.GetKey(KeyCode.Mouse0);
         else shooting = Input.GetKeyDown(KeyCode.Mouse0);
 
-        if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading) Reload();
-        if (Input.GetKeyDown(KeyCode.Mouse0) && bulletsLeft <= 0 && !reloading) audioSourceEmpty.PlayOneShot(emptySound, 0.7f);
+        if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magazineSize && !reloading && maxCapacity >= 0) Reload();
+        if (Input.GetKeyDown(KeyCode.Mouse0) && bulletsLeft <= 0 && !reloading && maxCapacity >= 0) audioSourceEmpty.PlayOneShot(emptySound, 0.7f);
 
         //shoot
 
@@ -126,7 +127,9 @@ public class PlayerShooting : MonoBehaviour
 
     private void ReloadFinished()
     {
+        maxCapacity -= (magazineSize - bulletsLeft);
         bulletsLeft = magazineSize;
         reloading = false;
+        print(maxCapacity);
     }
 }

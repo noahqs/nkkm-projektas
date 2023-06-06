@@ -5,35 +5,37 @@ using UnityEngine.SceneManagement;
 
 public class Teleportation : MonoBehaviour
 {
-    public Animator fadeAnimator;
-    public float fadeDuration = 1.0f;
-    public string targetLevelName;
+    public bool objectiveDone;
 
-    private bool isTeleporting = false;
-
-    void OnTriggerEnter(Collider other)
+    private void Start()
     {
-        if (other.CompareTag("Player") && !isTeleporting)
+        objectiveDone = false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+
+        if (other.gameObject.CompareTag("Objective"))
         {
-            StartCoroutine(Teleport());
+            Destroy(other.gameObject);
+            objectiveDone = true;
+        }
+        if (other.gameObject.CompareTag("EndObj"))
+        {
+            SceneManager.LoadScene("End");  
         }
     }
 
-    IEnumerator Teleport()
+    private void OnCollisionEnter(Collision collision)
     {
-        isTeleporting = true;
-        fadeAnimator.SetTrigger("FadeOut");
+        if (collision.gameObject.CompareTag("Teleporter"))
+        {
+            SceneManager.LoadScene("Level1");
+        }
+        if (collision.gameObject.CompareTag("Teleporter2") && objectiveDone)
+        {
+            SceneManager.LoadScene("Level2");
+        }
 
-        yield return new WaitForSeconds(fadeDuration);
-
-        SceneManager.LoadScene(targetLevelName);
-
-        yield return new WaitForEndOfFrame();
-
-        fadeAnimator.SetTrigger("FadeIn");
-
-        yield return new WaitForSeconds(fadeDuration);
-
-        isTeleporting = false;
     }
 }

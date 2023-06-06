@@ -64,6 +64,7 @@ public class Enemy : MonoBehaviour
 
     public bool dead;
     public bool destroyOnDeath;
+    public bool deletePieces;
 
     public GameObject enemyPrefab;
 
@@ -178,7 +179,7 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage()
     {
-        if (health.currentHp > 0) health.currentHp -= playerShooting.damage;
+        if (health.currentHp > 0) health.currentHp -= playerShooting.damage;    
 
         if (health.currentHp <= 0)
         {
@@ -189,7 +190,6 @@ public class Enemy : MonoBehaviour
     public void Death()
     {
         dead = true;
-        //Instantiate(enemyPrefab, enemy.transform.position, Quaternion.identity);
 
         if (destroyOnDeath)
         {
@@ -200,7 +200,7 @@ public class Enemy : MonoBehaviour
             for (var i = 0; i < randomIndex; i++)
             {
                 var enemyParts = Instantiate(enemyPrefab, enemy.transform.position, Quaternion.identity);
-                Destroy(enemyParts, 12);
+                if (deletePieces) Destroy(enemyParts, 12);
             }
         }
     }

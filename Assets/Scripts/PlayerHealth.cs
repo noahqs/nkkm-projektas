@@ -13,10 +13,14 @@ public class PlayerHealth : MonoBehaviour
 
     public Enemy enemy;
 
+    public AudioClip deathSound;
+    public AudioSource audioSourceDeath;
+
     private void Start()
     {
         currentHp = maxHp;
         //hpText = GetComponent<TextMeshProUGUI>();
+        audioSourceDeath = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -35,5 +39,7 @@ public class PlayerHealth : MonoBehaviour
     {
         transform.position = start.transform.position;
         currentHp = maxHp;
+        audioSourceDeath.PlayOneShot(deathSound);
+
     }
 }

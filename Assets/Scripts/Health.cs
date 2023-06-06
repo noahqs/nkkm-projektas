@@ -13,8 +13,6 @@ public class Health : MonoBehaviour
     public UnityEvent onDamage;
     public UnityEvent onDeath;
 
-    public bool destroyOnDeath;
-
     private void Start()
     {
         currentHp = maxHp;

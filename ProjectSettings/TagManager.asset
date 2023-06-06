@@ -5,13 +5,20 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ladder
-  - Platform
   - Enemy
   - Obstacle
   - bld1
   - bld2
   - bld3
   - bld4
+  - Slope
+  - Pistol
+  - Teleporter
+  - Objective
+  - Uzi
+  - Teleporter2
+  - Plane
+  - EndObj
   layers:
   - Default
   - TransparentFX

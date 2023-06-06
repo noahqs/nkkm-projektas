@@ -90,7 +90,6 @@ public class FirstPersonAudio : MonoBehaviour
         lastCharacterPosition = CurrentCharacterPosition;
     }
 
-
     /// <summary>
     /// Pause all MovingAudios and enforce play on audioToPlay.
     /// </summary>
